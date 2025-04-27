@@ -1,16 +1,21 @@
 import express from "express";
 import { PrismaClient } from "../src/generated/prisma";
-import { userRouter } from "./routes/user-route";
-import { urlRouter } from "./routes/url-route";
+import { userRouter, urlRouter, analyticsRouter } from "./routes";
+import { handleRedirect } from "./controllers/handle-redirect-controller";
+
 export const prisma = new PrismaClient();
 export const app = express();
 const port = 3000;
 
 app.use(express.json());
 
+app.get("/api/v1/:short", handleRedirect);
+
 app.use("/api/v1/auth", userRouter);
 
 app.use("/api/v1/generate", urlRouter);
+
+app.use("/api/v1/alalytics", analyticsRouter);
 
 const startServer = async () => {
   await prisma

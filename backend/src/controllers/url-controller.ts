@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "..";
 
-
 const JWT_SECRET = process.env.JWT_SECRET || "PasswordIsPassword";
 
 export const generateTinyUrl = async (req: Request, res: Response) => {
@@ -19,8 +18,10 @@ export const generateTinyUrl = async (req: Request, res: Response) => {
       return;
     }
 
-    // Generateing a JWT containing userId and URL
-    const token = jwt.sign({ userId, url }, JWT_SECRET, { expiresIn: "30d" });
+    // Generating a JWT containing userId and URL and time - for more unique
+    const token = jwt.sign({ userId, url, createdAt: Date.now() }, JWT_SECRET, {
+      expiresIn: "30d",
+    });
 
     let foundUnique = false;
     let Index = 0;

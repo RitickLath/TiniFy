@@ -5,6 +5,3 @@ export const urlRouter = express.Router();
 
 // generate the short url
 urlRouter.post("/", generateTinyUrl);
-
-// redirect logic
-urlRouter.get("/", (req, res) => {});
