@@ -1,8 +1,8 @@
 import express from "express";
 import { PrismaClient } from "../src/generated/prisma";
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 // use `prisma` in your application to read and write data in your DB
-const app = express();
+export const app = express();
 const port = 3000;
 
 app.get("/", (req, res) => {
