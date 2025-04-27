@@ -1,14 +1,13 @@
 import express from "express";
 import { PrismaClient } from "../src/generated/prisma";
+import { userRouter } from "./routes/user-route";
 export const prisma = new PrismaClient();
-// use `prisma` in your application to read and write data in your DB
 export const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use(express.json());
 
+app.use("/api/v1/auth", userRouter);
 const startServer = async () => {
   await prisma
     .$connect()
