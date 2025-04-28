@@ -1,20 +1,30 @@
 import { Request, Response } from "express";
 import { prisma } from "..";
+import { redisClient } from "../config/redis-config";
 
 export const handleRedirect = async (req: Request, res: Response) => {
   try {
     const { short } = req.params;
-    console.log(short);
 
+    // Step 1: Check if the short URL exists
     if (!short) {
       res.status(400).json({
         success: false,
-        message: "Invalid request. Missing userId or short URL.",
+        message: "Invalid request. Missing short URL.",
       });
       return;
     }
 
-    // Find the original URL
+    // Step 2: Check if the shortURL exists in the Redis cache
+
+    const ExistsInRedisCache = await redisClient.get(short);
+    if (ExistsInRedisCache) {
+      res.redirect(ExistsInRedisCache);
+      console.log("Redirection happens from Redis");
+      return;
+    }
+
+    // Step 3: Find the original URL in the database
     const data = await prisma.uRLs.findFirst({
       where: { redirectedURL: short },
     });
@@ -29,9 +39,9 @@ export const handleRedirect = async (req: Request, res: Response) => {
 
     const currentTime = new Date();
 
-    // Check if URL is expired
+    // Step 4: Check if URL is expired
     if (data.expirationDate < currentTime) {
-      // URL expired, delete it
+      // URL expired, delete
       await prisma.uRLs.delete({
         where: {
           id: data.id,
@@ -43,25 +53,43 @@ export const handleRedirect = async (req: Request, res: Response) => {
       });
       return;
     }
-    // Redirect user to the original URL (even before analytics part heppen to make the speed optimization)
+
+    // Step 5: Redirect user to the original URL (even before analytics part for speed optimization)
     res.redirect(data.originalURL);
 
-    // Record analytics
+    // Step 6: Set the original URL in Redis cache with expiration time
+    const timeRemaining = data.expirationDate.getTime() - currentTime.getTime(); // in milliseconds
+    const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 1 day in ms
+    const threeDaysInMilliseconds = 3 * oneDayInMilliseconds; // 3 days in ms
+
+    // If expiration is more than 3 days away, set a 3 days expiration
+    if (timeRemaining > threeDaysInMilliseconds) {
+      await redisClient.set(short, data.originalURL, {
+        EX: threeDaysInMilliseconds / 1000,
+      });
+    } else {
+      // Else set the expiry time as same as the database time left
+      await redisClient.set(short, data.originalURL, {
+        EX: timeRemaining / 1000,
+      });
+    }
+
+    // Step 7: Record analytics (non-blocking)
     const userAgent = req.headers["user-agent"] || "unknown";
     const referer = req.headers["referer"] || "direct";
     const ipAddress = req.ip || "Protected";
 
-    // now awaiting for instant thread free.
-    prisma.analytics.create({
-      data: {
-        deviceType: userAgent,
-        referer: referer,
-        ipAddress: ipAddress,
-        urlId: data.id,
-      },
-    });
+    prisma.analytics
+      .create({
+        data: {
+          deviceType: userAgent,
+          referer: referer,
+          ipAddress: ipAddress,
+          urlId: data.id,
+        },
+      })
+      .catch((err) => console.error("[Analytics Error]", err));
   } catch (error) {
-    console.error("[handleRedirect Error]", error);
     res.status(500).json({
       success: false,
       message: "An unexpected error occurred while redirecting.",

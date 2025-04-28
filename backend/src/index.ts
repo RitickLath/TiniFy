@@ -2,6 +2,7 @@ import express from "express";
 import { PrismaClient } from "../src/generated/prisma";
 import { userRouter, urlRouter, analyticsRouter } from "./routes";
 import { handleRedirect } from "./controllers/handle-redirect-controller";
+import { RedisConnect } from "./config/redis-config";
 
 export const prisma = new PrismaClient();
 export const app = express();
@@ -18,6 +19,7 @@ app.use("/api/v1/generate", urlRouter);
 app.use("/api/v1/alalytics", analyticsRouter);
 
 const startServer = async () => {
+  await RedisConnect();
   await prisma
     .$connect()
     .then(() => {

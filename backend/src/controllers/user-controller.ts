@@ -90,7 +90,6 @@ export const signup = async (req: Request, res: Response) => {
       token,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       status: false,
       message: "An unexpected error occurred. Please try again later.",
@@ -166,7 +165,6 @@ export const signin = async (req: Request, res: Response) => {
       token,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       status: false,
       message: "An unexpected error occurred. Please try again later.",
