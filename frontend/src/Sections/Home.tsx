@@ -1,7 +1,13 @@
-import { FC } from "react";
+import Landing from "../Components/Landing";
+import Navbar from "../Components/Navbar";
 
-const Home: FC = () => {
-  return <div>Home</div>;
+const Home = () => {
+  return (
+    <div>
+      <Navbar />
+      <Landing />
+    </div>
+  );
 };
 
 export default Home;
