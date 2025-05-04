@@ -1,7 +1,8 @@
 import { FC } from "react";
+import Form from "../Components/Form";
 
 const Login: FC = () => {
-  return <div>Login</div>;
+  return <Form isSignup={false} />;
 };
 
 export default Login;
