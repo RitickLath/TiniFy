@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formpageImageUrl, Formstyles } from "../constants/style";
+import { handleSignin, handleSignup } from "../utils/handler";
 
 interface FormProps {
   isSignup: boolean;
@@ -10,11 +11,30 @@ const Form: FC<FormProps> = ({ isSignup }) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    const payload = isSignup ? { name, email, password } : { email, password };
-    console.log(isSignup ? "Signing up:" : "Logging in:", payload);
+  const handleCall = async () => {
+    setMessage(null);
+    setIsError(false);
+
+    const response = isSignup
+      ? await handleSignup(name, email, password)
+      : await handleSignin(email, password);
+
+    if (response?.status) {
+      setMessage(isSignup ? "Registered successfully!" : "Login successful!");
+      setIsError(false);
+
+      setTimeout(() => {
+        navigate(isSignup ? "/signin" : "/dashboard");
+      }, 2000);
+    } else {
+      setMessage(response?.message || "Something went wrong.");
+      setIsError(true);
+    }
   };
 
   return (
@@ -63,10 +83,22 @@ const Form: FC<FormProps> = ({ isSignup }) => {
           className={Formstyles.input}
         />
 
-        <button onClick={handleSubmit} className={Formstyles.button}>
+        <button onClick={handleCall} className={Formstyles.button}>
           {isSignup ? "Sign Up" : "Login"}
         </button>
 
+        {/* Message Box */}
+        {message && (
+          <p
+            className={`text-sm text-center mt-2 ${
+              isError ? "text-red-400" : "text-green-400"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+
+        {/* Redirect Link */}
         <p className={Formstyles.subtitle}>
           {isSignup ? (
             <>
