@@ -37,6 +37,7 @@ const Form: FC<FormProps> = ({ isSignup }) => {
         {isSignup && (
           <input
             type="text"
+            required
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -46,6 +47,7 @@ const Form: FC<FormProps> = ({ isSignup }) => {
 
         <input
           type="email"
+          required
           placeholder="Email Address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -54,6 +56,7 @@ const Form: FC<FormProps> = ({ isSignup }) => {
 
         <input
           type="password"
+          required
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
