@@ -171,3 +171,13 @@ export const signin = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const validate = async (req: Request, res: Response) => {
+  const user = (req as any).user;
+
+  res.status(200).json({
+    status: true,
+    message: "Token is valid",
+    user,
+  });
+};
