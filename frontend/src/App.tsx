@@ -10,12 +10,12 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           {/* Non Registered User */}
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute isProtected={false} />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
           </Route>
           {/* Registered User */}
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute isProtected={true} />}>
             <Route path="/dashboard" element={<Dashboard />} />
           </Route>
           <Route path="*" element={<NotFound />} />

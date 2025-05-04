@@ -30,7 +30,7 @@ export const handleSignin = async (email: string, password: string) => {
     if (response) {
       const { status, message, token } = response.data;
       if (token) {
-        localStorage.setItem("authToken", `bearer ${token}`);
+        localStorage.setItem("authToken", `Bearer ${token}`);
       }
 
       return { status, message, token };
